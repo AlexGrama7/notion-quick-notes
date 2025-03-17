@@ -39,7 +39,7 @@
 
 .settings-section {
   margin-bottom: var(--spacing-xl);
-  background-color: white;
+  background-color: var(--card-bg-color);
   border-radius: var(--border-radius);
   padding: var(--spacing-lg);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
