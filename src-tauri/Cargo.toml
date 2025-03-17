@@ -2,9 +2,9 @@
 name = "notion-quick-notes"
 version = "0.1.0"
 description = "A lightweight app for quick note capture to Notion"
-authors = ["You"]
+authors = ["Alex Grama"]
 license = ""
-repository = ""
+repository = "https://github.com/AlexGrama7/notion-quick-notes"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

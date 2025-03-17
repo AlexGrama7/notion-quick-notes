@@ -1,8 +1,6 @@
 use reqwest::{Client, header};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::error::Error as StdError;
-use std::sync::Arc;
 use tauri::State;
 use chrono::{Local, Timelike, Datelike};
 
@@ -20,7 +18,7 @@ pub struct NotionPage {
 // Notion API client
 struct NotionApiClient {
     client: Client,
-    api_token: String,
+    _api_token: String, // Prefixed with underscore to indicate intentionally unused
 }
 
 impl NotionApiClient {
@@ -47,7 +45,7 @@ impl NotionApiClient {
             
         Ok(NotionApiClient {
             client,
-            api_token,
+            _api_token: api_token,
         })
     }
     
