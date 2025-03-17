@@ -25,6 +25,7 @@ const Settings: React.FC = () => {
     const savedTheme = localStorage.getItem('theme');
     return savedTheme === 'dark';
   });
+  const [isLoaded, setIsLoaded] = useState(false);
   
   useEffect(() => {
     // Apply theme when component mounts and when darkMode changes
@@ -38,9 +39,20 @@ const Settings: React.FC = () => {
   }, [darkMode]);
   
   useEffect(() => {
-    // Load saved settings
-    loadSavedSettings();
+    // Force a re-render after component mount
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
+  
+  useEffect(() => {
+    // Load saved settings when component is fully mounted
+    if (isLoaded) {
+      loadSavedSettings();
+    }
+  }, [isLoaded]);
   
   const loadSavedSettings = async () => {
     try {
