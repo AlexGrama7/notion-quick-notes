@@ -6,7 +6,24 @@ const NoteInput: React.FC = () => {
   const [note, setNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [darkMode, setDarkMode] = useState(() => {
+    // Check if user previously had dark mode enabled
+    const savedTheme = localStorage.getItem('theme');
+    return savedTheme === 'dark';
+  });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Apply theme when component mounts and when darkMode changes
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [darkMode]);
   
   useEffect(() => {
     // Focus the textarea when the component mounts
@@ -24,11 +41,28 @@ const NoteInput: React.FC = () => {
     };
     
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    
+    // Add online/offline event listeners
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, [note]);
   
   const handleSave = async () => {
     if (!note.trim()) {
+      return;
+    }
+    
+    if (isOffline) {
+      setError('You appear to be offline. Can\'t save note at the moment.');
       return;
     }
     
@@ -40,7 +74,15 @@ const NoteInput: React.FC = () => {
       setNote('');
       handleCancel(); // Close the window after saving
     } catch (err) {
-      setError(`Error: ${err}`);
+      if (typeof err === 'string' && err.includes('network')) {
+        setError('Network error: Please check your internet connection and try again.');
+      } else if (typeof err === 'string' && err.includes('token')) {
+        setError('API token error: Please go to Settings and verify your Notion API token.');
+      } else if (typeof err === 'string' && err.includes('page')) {
+        setError('Page error: Please go to Settings and verify your selected Notion page.');
+      } else {
+        setError(`Error: ${err}`);
+      }
     } finally {
       setIsSaving(false);
     }
@@ -53,15 +95,39 @@ const NoteInput: React.FC = () => {
   const handleClose = () => {
     invoke('close_note_input');
   };
+  
+  const openSettings = () => {
+    invoke('show_settings');
+    // Close the current window after opening settings
+    invoke('close_note_input');
+  };
+  
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
 
   return (
     <div className="note-input-container">
       <div className="titlebar">
         <div className="titlebar-text">Quick Note</div>
         <div className="titlebar-controls">
-          <button className="close-button" onClick={handleClose}>×</button>
+          <button className="titlebar-button" onClick={openSettings} title="Settings">
+            ⚙️
+          </button>
+          <button className="titlebar-button" onClick={toggleDarkMode} title="Toggle Dark Mode">
+            {darkMode ? '☀️' : '🌙'}
+          </button>
+          <button className="titlebar-button" onClick={handleClose} title="Close">
+            ✕
+          </button>
         </div>
       </div>
+      
+      {isOffline && (
+        <div className="offline-banner">
+          You're currently offline. Notes will be saved when you're back online.
+        </div>
+      )}
       
       <textarea
         ref={textareaRef}
@@ -71,7 +137,16 @@ const NoteInput: React.FC = () => {
         onChange={(e) => setNote(e.target.value)}
       />
       
-      {error && <div className="error-message">{error}</div>}
+      {error && (
+        <div className="error-message">
+          {error}
+          {error.includes('token') || error.includes('page') ? (
+            <button className="error-action-button" onClick={openSettings}>
+              Open Settings
+            </button>
+          ) : null}
+        </div>
+      )}
       
       <div className="button-container">
         <button 

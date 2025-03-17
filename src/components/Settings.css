@@ -7,11 +7,31 @@
   overflow-y: auto;
 }
 
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
 .settings-title {
+  margin: 0;
   font-size: 24px;
-  font-weight: 600;
-  margin-bottom: var(--spacing-lg);
   color: var(--primary-color);
+}
+
+.dark-mode-toggle {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.dark-mode-toggle:hover {
+  background-color: var(--card-bg-color);
 }
 
 .settings-section {
@@ -115,4 +135,32 @@
   .verify-button, .fetch-button, .save-button {
     margin-top: 0;
   }
+}
+
+.first-time-setup {
+  background-color: var(--info-bg-color, rgba(33, 150, 243, 0.1));
+  border: 1px solid var(--info-color, #2196f3);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.first-time-setup h3 {
+  margin-top: 0;
+  color: var(--info-color, #2196f3);
+  font-size: 18px;
+}
+
+.first-time-setup ol {
+  margin: 12px 0;
+  padding-left: 24px;
+}
+
+.first-time-setup li {
+  margin-bottom: 8px;
+}
+
+.first-time-setup p:last-child {
+  margin-bottom: 0;
+  font-style: italic;
 }

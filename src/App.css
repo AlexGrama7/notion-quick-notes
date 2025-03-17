@@ -1,17 +1,23 @@
 :root {
   /* Color variables */
-  --primary-color: #2E75CC;
-  --primary-hover: #3D84DB;
-  --secondary-color: #F5F5F5;
-  --text-color: #333333;
-  --text-light: #666666;
-  --error-color: #E53935;
-  --success-color: #43A047;
-  --bg-color: #FFFFFF;
-  --border-color: #E0E0E0;
+  --primary-color: #333333;
+  --primary-hover: #505050;
+  --secondary-color: #666666;
+  --background-color: #ffffff;
+  --card-bg-color: #f5f5f5;
+  --text-color: #111111;
+  --secondary-text-color: #444444;
+  --border-color: #dddddd;
+  --error-color: #d32f2f;
+  --success-color: #2e7d32;
+  --info-color: #0288d1;
+  --info-bg-color: rgba(2, 136, 209, 0.1);
+  --warning-color: #ed6c02;
+  --warning-bg-color: rgba(237, 108, 2, 0.1);
   
   /* Size variables */
-  --border-radius: 4px;
+  --border-radius: 8px;
+  --button-border-radius: 4px;
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
@@ -21,6 +27,20 @@
   /* Animation variables */
   --transition-speed: 150ms;
   --transition-easing: ease-in-out;
+  --fade-in-duration: 0.2s;
+}
+
+[data-theme="dark"] {
+  --primary-color: #888888;
+  --primary-hover: #a0a0a0;
+  --secondary-color: #666666;
+  --background-color: #121212;
+  --card-bg-color: #1e1e1e;
+  --text-color: #e0e0e0;
+  --secondary-text-color: #aaaaaa;
+  --border-color: #333333;
+  --info-bg-color: rgba(2, 136, 209, 0.2);
+  --warning-bg-color: rgba(237, 108, 2, 0.2);
 }
 
 * {
@@ -30,9 +50,12 @@
 }
 
 body {
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-  background-color: var(--bg-color);
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--background-color);
   color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
   font-size: 14px;
   line-height: 1.5;
   height: 100vh;

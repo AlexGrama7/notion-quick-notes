@@ -19,6 +19,23 @@ const Settings: React.FC = () => {
   const [selectedPageTitle, setSelectedPageTitle] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [isFirstTime, setIsFirstTime] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    // Check if user previously had dark mode enabled
+    const savedTheme = localStorage.getItem('theme');
+    return savedTheme === 'dark';
+  });
+  
+  useEffect(() => {
+    // Apply theme when component mounts and when darkMode changes
+    if (darkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [darkMode]);
   
   useEffect(() => {
     // Load saved settings
@@ -34,6 +51,11 @@ const Settings: React.FC = () => {
       
       const pageId = await invoke<string>('get_selected_page_id');
       setSelectedPageId(pageId);
+      
+      // Check if this is first time setup
+      if (!token && !pageId) {
+        setIsFirstTime(true);
+      }
       
       if (token && pageId) {
         fetchNotionPages();
@@ -120,9 +142,36 @@ const Settings: React.FC = () => {
     setSuccessMessage('');
   };
   
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+  
   return (
     <div className="settings-container">
-      <h1 className="settings-title">Notion Quick Notes Settings</h1>
+      <div className="settings-header">
+        <h1 className="settings-title">Notion Quick Notes Settings</h1>
+        <button 
+          className="dark-mode-toggle" 
+          onClick={toggleDarkMode}
+          title="Toggle Dark Mode"
+        >
+          {darkMode ? '☀️' : '🌙'}
+        </button>
+      </div>
+      
+      {isFirstTime && (
+        <div className="first-time-setup">
+          <h3>Welcome to Notion Quick Notes!</h3>
+          <p>To get started, you need to:</p>
+          <ol>
+            <li>Create a Notion integration at <a href="https://www.notion.so/my-integrations" target="_blank" rel="noreferrer">notion.so/my-integrations</a></li>
+            <li>Copy your integration token and paste it below</li>
+            <li>Verify the token and select a page where your notes will be saved</li>
+            <li>Share your selected Notion page with your integration</li>
+          </ol>
+          <p>Need help? Click "About" in the system tray menu for detailed instructions.</p>
+        </div>
+      )}
       
       <div className="settings-section">
         <h2>Notion API Integration</h2>

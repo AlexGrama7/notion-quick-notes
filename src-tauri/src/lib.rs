@@ -5,8 +5,24 @@ pub mod config;
 pub mod notion;
 pub mod error;
 
+// Function to check if settings are configured before showing the note input
+pub fn check_settings_configured(app: &AppHandle) -> bool {
+    let state = app.state::<config::AppState>();
+    let config = state.config.lock().unwrap();
+    
+    // Check if API token and page ID are set
+    !config.notion_api_token.is_empty() && !config.selected_page_id.is_empty()
+}
+
 // Function to show the note input window
 pub fn show_note_input(app: AppHandle) {
+    // Check if settings are configured
+    if !check_settings_configured(&app) {
+        // If not configured, show settings window instead
+        show_settings(app);
+        return;
+    }
+    
     if let Some(window) = app.get_window("main") {
         window.show().unwrap();
         window.set_focus().unwrap();
@@ -19,6 +35,7 @@ pub fn show_note_input(app: AppHandle) {
         .title("Notion Quick Notes")
         .resizable(false)
         .decorations(false)
+        .inner_size(400.0, 250.0) // Smaller window size
         .center()
         .build();
     }

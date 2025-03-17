@@ -27,6 +27,7 @@ fn main() {
     // Create system tray menu
     let tray_menu = SystemTrayMenu::new()
         .add_item(CustomMenuItem::new("settings".to_string(), "Settings"))
+        .add_item(CustomMenuItem::new("about".to_string(), "About"))
         .add_native_item(SystemTrayMenuItem::Separator)
         .add_item(CustomMenuItem::new("quit".to_string(), "Quit"));
 
@@ -57,6 +58,18 @@ fn main() {
                 match id.as_str() {
                     "settings" => {
                         notion_quick_notes::show_settings(app.app_handle());
+                    }
+                    "about" => {
+                        let _ = tauri::WindowBuilder::new(
+                            app,
+                            "about",
+                            tauri::WindowUrl::App("index.html?about=true".into()),
+                        )
+                        .title("About Notion Quick Notes")
+                        .resizable(false)
+                        .inner_size(600.0, 600.0)
+                        .center()
+                        .build();
                     }
                     "quit" => {
                         std::process::exit(0);
