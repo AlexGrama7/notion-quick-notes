@@ -1,0 +1,12 @@
+{
+  "identifier": "default-capability",
+  "description": "Default capabilities for Notion Quick Notes",
+  "permissions": [
+    "core:default",
+    "core:app:default",
+    "core:event:default", 
+    "core:window:default",
+    "core:webview:default",
+    "core:tray:default"
+  ]
+}

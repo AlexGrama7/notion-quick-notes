@@ -1,0 +1,77 @@
+.note-input-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--bg-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.note-textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 200px;
+  padding: var(--spacing-md);
+  border: none;
+  resize: none;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.note-textarea:focus {
+  outline: none;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--secondary-color);
+}
+
+.cancel-button {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.cancel-button:hover:not(:disabled) {
+  background-color: #EBEBEB;
+}
+
+.save-button {
+  background-color: var(--primary-color);
+  color: white;
+  min-width: 150px;
+}
+
+.save-button:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+/* Keyboard shortcut hint */
+.keyboard-hint {
+  color: var(--text-light);
+  font-size: 12px;
+  margin-left: var(--spacing-sm);
+}
+
+/* Make sure the textarea doesn't show scrollbar on Windows */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--secondary-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #BDBDBD;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #9E9E9E;
+}

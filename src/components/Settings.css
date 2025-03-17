@@ -1,0 +1,118 @@
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: var(--spacing-lg);
+  background-color: var(--bg-color);
+  overflow-y: auto;
+}
+
+.settings-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: var(--spacing-lg);
+  color: var(--primary-color);
+}
+
+.settings-section {
+  margin-bottom: var(--spacing-xl);
+  background-color: white;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.settings-section h2 {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-color);
+}
+
+.settings-description {
+  color: var(--text-light);
+  margin-bottom: var(--spacing-md);
+  line-height: 1.6;
+}
+
+.settings-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  margin-left: var(--spacing-sm);
+}
+
+.settings-link:hover {
+  text-decoration: underline;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.input-group label {
+  font-weight: 500;
+}
+
+.settings-input {
+  flex: 1;
+  padding: var(--spacing-md);
+  font-family: monospace;
+  letter-spacing: 1px;
+}
+
+.verify-button, .fetch-button, .save-button {
+  align-self: flex-start;
+  margin-top: var(--spacing-sm);
+}
+
+.page-selection-section {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+}
+
+.select-container {
+  margin: var(--spacing-md) 0;
+}
+
+.page-select {
+  width: 100%;
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.selected-page {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background-color: var(--secondary-color);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--primary-color);
+}
+
+.settings-footer {
+  margin-top: auto;
+  padding-top: var(--spacing-lg);
+  text-align: center;
+  color: var(--text-light);
+  font-size: 12px;
+}
+
+/* For larger screens */
+@media (min-width: 768px) {
+  .input-group {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .input-group label {
+    width: 150px;
+    flex-shrink: 0;
+  }
+  
+  .verify-button, .fetch-button, .save-button {
+    margin-top: 0;
+  }
+}
