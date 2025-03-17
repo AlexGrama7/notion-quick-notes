@@ -1,7 +1,9 @@
 .note-input-container {
   display: flex;
   flex-direction: column;
-  height: 250px;
+  height: auto;
+  min-height: 200px;
+  max-height: 250px;
   width: 100%;
   background-color: var(--background-color);
   border-radius: var(--border-radius);
@@ -68,14 +70,15 @@
 
 .note-textarea {
   flex: 1;
+  min-height: 0;
   border: none;
   resize: none;
   padding: 12px;
   font-size: 14px;
-  min-height: 120px;
   background-color: var(--background-color);
   color: var(--text-color);
   outline: none;
+  overflow-y: auto;
 }
 
 /* Custom scrollbar */
@@ -94,11 +97,12 @@
 
 .button-container {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 8px 12px;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px;
   background-color: var(--card-bg-color);
   border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .cancel-button, .save-button {
@@ -184,20 +188,20 @@
   margin-left: var(--spacing-sm);
 }
 
-/* Make sure the textarea doesn't show scrollbar on Windows */
+/* Remove duplicate scrollbar styles */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--secondary-color);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #BDBDBD;
+  background-color: var(--secondary-color);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #9E9E9E;
+  background-color: var(--primary-hover);
 }

@@ -96,10 +96,13 @@ const NoteInput: React.FC = () => {
     invoke('close_note_input');
   };
   
-  const openSettings = () => {
-    invoke('show_settings');
-    // Close the current window after opening settings
-    invoke('close_note_input');
+  const openSettings = async () => {
+    // First open the settings window, then close this one 
+    // with a slight delay to ensure the settings window opens first
+    await invoke('show_settings');
+    setTimeout(() => {
+      invoke('close_note_input');
+    }, 100);
   };
   
   const toggleDarkMode = () => {
