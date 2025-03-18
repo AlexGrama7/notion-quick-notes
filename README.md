@@ -18,6 +18,11 @@ A lightweight Windows desktop application for quick note capture to Notion. Capt
 - **Enhanced Error Handling**: Clear error messages with direct settings access
 - **Responsive UI**: Optimized window sizes and improved button layouts
 
+## Planned Features
+
+- **Quick Reference Panel**: Collapsible sidebar showing recently captured notes for easy reference and re-use
+- **Search History**: Integrated search functionality to quickly find previously taken notes without leaving the app
+
 ## Setup
 
 ### Prerequisites
@@ -135,3 +140,14 @@ All settings are stored locally in the app configuration directory:
 ## License
 
 MIT
+
+## Build Instructions
+
+This Tauri application can be built by running:
+
+   npm run tauri build
+
+The build produces the following installers:
+
+   - MSI: target/release/bundle/msi/Notion Quick Notes_0.1.0_x64_en-US.msi
+   - NSIS: target/release/bundle/nsis/Notion Quick Notes_0.1.0_x64-setup.exe
