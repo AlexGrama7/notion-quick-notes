@@ -1,15 +1,22 @@
-import { useState, useEffect, useMemo, useCallback, memo } from "react";
+import { useState, useEffect, useMemo, useCallback, memo, lazy, Suspense } from "react";
 import "./App.css";
-import NoteInput from "./components/NoteInput";
-import Settings from "./components/Settings";
-import About from "./components/About";
+// Lazy load components instead of importing them directly
+const NoteInput = lazy(() => import("./components/NoteInput"));
+const Settings = lazy(() => import("./components/Settings"));
+const About = lazy(() => import("./components/About"));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="loading-container">
+    <div className="loading-spinner"></div>
+  </div>
+);
 
 const App: React.FC = () => {
   const [view, setView] = useState<"note" | "settings" | "about">("note");
   
   // Memoize the URL parameter checking function
   const checkWindow = useCallback(() => {
-    console.log("Checking which window to display");
     const url = window.location.href;
     
     const queryParams = new URLSearchParams(window.location.search);
@@ -19,11 +26,11 @@ const App: React.FC = () => {
     // Check window title as a fallback method
     const windowTitle = document.title;
     
-    if (settingsParam === "true" || url.includes("settings=true") || windowTitle.includes("Settings")) {
+    if (settingsParam === "true" || url.indexOf("settings=true") >= 0 || windowTitle.includes("Settings")) {
       setView("settings");
       document.title = "Notion Quick Notes - Settings";
       document.body.setAttribute('data-window', 'settings');
-    } else if (aboutParam === "true" || url.includes("about=true") || windowTitle.includes("About")) {
+    } else if (aboutParam === "true" || url.indexOf("about=true") >= 0 || windowTitle.includes("About")) {
       setView("about");
       document.title = "Notion Quick Notes - About";
       document.body.setAttribute('data-window', 'about');
@@ -41,6 +48,11 @@ const App: React.FC = () => {
       document.documentElement.setAttribute('data-theme', 'dark');
     } else {
       document.documentElement.setAttribute('data-theme', 'light');
+    }
+    
+    // Preload component that's likely to be needed based on the URL
+    if (window.location.href.indexOf("settings=true") >= 0) {
+      import("./components/Settings");
     }
     
     // Initial view check
@@ -71,7 +83,9 @@ const App: React.FC = () => {
 
   return (
     <div className={containerClass}>
-      {CurrentView}
+      <Suspense fallback={<LoadingFallback />}>
+        {CurrentView}
+      </Suspense>
     </div>
   );
 }

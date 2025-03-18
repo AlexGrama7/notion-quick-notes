@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
+import useApiWorker from '../worker/useApiWorker';
 import './NoteInput.css';
 
 const NoteInput: React.FC = () => {
   const [note, setNote] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [sendStatus, setSendStatus] = useState<null | 'sending' | 'sent'>(null);
@@ -14,6 +14,9 @@ const NoteInput: React.FC = () => {
     return savedTheme === 'dark';
   });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Get the API worker
+  const { sendMessage } = useApiWorker();
   
   // Apply theme when component mounts and when darkMode changes
   useEffect(() => {
@@ -37,12 +40,13 @@ const NoteInput: React.FC = () => {
       return;
     }
     
-    setIsSaving(true);
     setSendStatus('sending');
     setError(null);
     
     try {
-      await invoke('append_note', { noteText: note });
+      // Use the worker instead of direct invoke
+      await sendMessage('appendNote', { noteText: note });
+      
       setNote('');
       setSendStatus('sent');
       
@@ -52,20 +56,20 @@ const NoteInput: React.FC = () => {
         handleCancel(); // Close the window after showing sent message
       }, 2000);
     } catch (err) {
-      if (typeof err === 'string' && err.includes('network')) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      
+      if (errorMsg.includes('network')) {
         setError('Network error: Please check your internet connection and try again.');
-      } else if (typeof err === 'string' && err.includes('token')) {
+      } else if (errorMsg.includes('token')) {
         setError('API token error: Please go to Settings and verify your Notion API token.');
-      } else if (typeof err === 'string' && err.includes('page')) {
+      } else if (errorMsg.includes('page')) {
         setError('Page error: Please go to Settings and verify your selected Notion page.');
       } else {
-        setError(`Error: ${err}`);
+        setError(`Error: ${errorMsg}`);
       }
       setSendStatus(null);
-    } finally {
-      setIsSaving(false);
     }
-  }, [note, isOffline]);
+  }, [note, isOffline, sendMessage]);
   
   const handleCancel = useCallback(() => {
     invoke('close_note_input');

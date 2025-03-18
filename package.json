@@ -1,13 +1,14 @@
 {
   "name": "notion-quick-notes",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "cross-env NODE_ENV=production tsc && vite build --mode production",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "analyze": "cross-env NODE_ENV=production vite build --mode analyze"
   },
   "dependencies": {
     "@tauri-apps/api": "^1.6.0",
@@ -20,6 +21,9 @@
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "cross-env": "^7.0.3",
+    "rollup-plugin-visualizer": "^5.9.2",
+    "terser": "^5.39.0",
     "typescript": "~5.6.2",
     "vite": "^6.0.3"
   }

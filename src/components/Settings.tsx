@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
+import useApiWorker from '../worker/useApiWorker';
 import './Settings.css';
 
 interface NotionPage {
@@ -29,6 +30,9 @@ const Settings: React.FC = () => {
     return savedTheme === 'dark';
   });
   const [isLoaded, setIsLoaded] = useState(false);
+  
+  // Get API worker
+  const { sendMessage } = useApiWorker();
   
   useEffect(() => {
     // Apply theme when component mounts and when darkMode changes
@@ -103,9 +107,11 @@ const Settings: React.FC = () => {
     }
     
     try {
-      const valid = await invoke<boolean>('set_notion_api_token', { apiToken });
-      setIsTokenValid(valid);
-      if (valid) {
+      // Use the worker for API call
+      const response = await sendMessage('verifyToken', { apiToken }) as { valid: boolean };
+      setIsTokenValid(response.valid);
+      
+      if (response.valid) {
         setSavedToken(apiToken);
         setSuccessMessage('API token verified successfully!');
         // Clear the cache when the token changes
@@ -113,18 +119,19 @@ const Settings: React.FC = () => {
         await fetchNotionPages();
       }
     } catch (error) {
-      setErrorMessage(`Error: ${error}`);
+      setErrorMessage(`Error: ${error instanceof Error ? error.message : String(error)}`);
       setIsTokenValid(false);
     }
-  }, [apiToken, clearMessages]);
+  }, [apiToken, clearMessages, sendMessage]);
   
   const fetchNotionPages = useCallback(async () => {
     setIsFetchingPages(true);
     clearMessages();
     
     try {
-      // If the cache is empty or we're explicitly refreshing, fetch pages
-      const pages = await invoke<NotionPage[]>('search_notion_pages');
+      // Use the worker for API call
+      const response = await sendMessage('searchPages') as { data: NotionPage[] };
+      const pages = response.data;
       
       // Update cache and state
       pagesCache = pages;
@@ -138,11 +145,11 @@ const Settings: React.FC = () => {
         }
       }
     } catch (error) {
-      setErrorMessage(`Failed to fetch pages: ${error}`);
+      setErrorMessage(`Failed to fetch pages: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsFetchingPages(false);
     }
-  }, [selectedPageId, clearMessages]);
+  }, [selectedPageId, clearMessages, sendMessage]);
   
   const saveSelectedPage = useCallback(async () => {
     if (!selectedPageId) {
@@ -160,7 +167,8 @@ const Settings: React.FC = () => {
         return;
       }
       
-      await invoke('set_selected_page_id', { 
+      // Use the worker for API call
+      await sendMessage('saveSelectedPage', {
         pageId: selectedPageId,
         pageTitle: selectedPage.title
       });
@@ -168,9 +176,9 @@ const Settings: React.FC = () => {
       setSelectedPageTitle(selectedPage.title);
       setSuccessMessage('Selected page saved successfully!');
     } catch (error) {
-      setErrorMessage(`Failed to save selected page: ${error}`);
+      setErrorMessage(`Failed to save selected page: ${error instanceof Error ? error.message : String(error)}`);
     }
-  }, [selectedPageId, notionPages, clearMessages]);
+  }, [selectedPageId, notionPages, clearMessages, sendMessage]);
   
   const handleBackNavigation = useCallback(async () => {
     try {
@@ -304,29 +312,23 @@ const Settings: React.FC = () => {
             
             {selectedPageTitle && (
               <div className="selected-page">
-                <p>Current page: <strong>{selectedPageTitle}</strong></p>
+                <p>Current Selected Page: <strong>{selectedPageTitle}</strong></p>
               </div>
             )}
           </div>
         )}
         
         {errorMessage && (
-          <div className="error-message">
-            {errorMessage}
-          </div>
+          <div className="error-message">{errorMessage}</div>
         )}
         
         {successMessage && (
-          <div className="success-message">
-            {successMessage}
-          </div>
+          <div className="success-message">{successMessage}</div>
         )}
       </div>
       
-      <div className="settings-footer">
-        <p>
-          Notion Quick Notes - v0.1.0
-        </p>
+      <div className="app-info">
+        <p>Notion Quick Notes - v1.1.0</p>
       </div>
     </div>
   );
