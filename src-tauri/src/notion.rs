@@ -134,7 +134,7 @@ impl NotionApiClient {
             .await
             .map_err(|e| format!("Failed to parse response: {}", e))?;
             
-        let pages = search_result["results"]
+        let pages: Vec<NotionPage> = search_result["results"]
             .as_array()
             .ok_or("Invalid response format")?
             .iter()
@@ -316,13 +316,17 @@ pub fn get_notion_api_token(state: State<'_, AppState>) -> Result<String, String
 pub async fn search_notion_pages(
     state: State<'_, AppState>,
 ) -> Result<Vec<NotionPage>, String> {
-    let config = state.config.lock().unwrap();
-    let api_token = config.notion_api_token.clone();
+    // Extract what we need from the Mutex and immediately drop the lock
+    let api_token = {
+        let config = state.config.lock().unwrap();
+        let token = config.notion_api_token.clone();
+        if token.is_empty() {
+            return Err("API token is not set".into());
+        }
+        token
+    }; // MutexGuard is dropped here
     
-    if api_token.is_empty() {
-        return Err("API token is not set".into());
-    }
-    
+    // Now we can safely use .await
     let client = NotionApiClient::new(api_token)?;
     client.search_pages().await
 }
@@ -353,10 +357,8 @@ pub async fn append_note(
     note_text: String,
     state: State<'_, AppState>,
 ) -> Result<(), String> {
-    let api_token;
-    let page_id;
-    
-    {
+    // Extract what we need and drop the lock before async operations
+    let (api_token, page_id) = {
         let config = state.config.lock().unwrap();
         
         if config.notion_api_token.is_empty() {
@@ -367,17 +369,10 @@ pub async fn append_note(
             return Err("No Notion page selected".into());
         }
         
-        page_id = config.selected_page_id.clone();
-        api_token = config.notion_api_token.clone();
-    }
+        (config.notion_api_token.clone(), config.selected_page_id.clone())
+    }; // MutexGuard is dropped here
     
-    match NotionApiClient::new(api_token) {
-        Ok(client) => {
-            match client.append_note_to_page(&page_id, &note_text).await {
-                Ok(_) => Ok(()),
-                Err(e) => Err(format!("Failed to append note: {}", e))
-            }
-        }
-        Err(e) => Err(format!("Failed to create API client: {}", e))
-    }
+    // Now we can safely use .await
+    let client = NotionApiClient::new(api_token)?;
+    client.append_note_to_page(&page_id, &note_text).await
 }
