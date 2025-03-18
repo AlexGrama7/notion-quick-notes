@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import './Settings.css';
 
@@ -8,6 +8,9 @@ interface NotionPage {
   icon?: string;
   url: string;
 }
+
+// Create a cache for pages to prevent unnecessary API calls
+let pagesCache: NotionPage[] = [];
 
 const Settings: React.FC = () => {
   const [apiToken, setApiToken] = useState('');
@@ -38,23 +41,12 @@ const Settings: React.FC = () => {
     }
   }, [darkMode]);
   
+  // No need for setTimeout - directly set isLoaded
   useEffect(() => {
-    // Force a re-render after component mount
-    const timer = setTimeout(() => {
-      setIsLoaded(true);
-    }, 100);
-    
-    return () => clearTimeout(timer);
+    setIsLoaded(true);
   }, []);
   
-  useEffect(() => {
-    // Load saved settings when component is fully mounted
-    if (isLoaded) {
-      loadSavedSettings();
-    }
-  }, [isLoaded]);
-  
-  const loadSavedSettings = async () => {
+  const loadSavedSettings = useCallback(async () => {
     try {
       const token = await invoke<string>('get_notion_api_token');
       setSavedToken(token);
@@ -70,14 +62,39 @@ const Settings: React.FC = () => {
       }
       
       if (token && pageId) {
-        fetchNotionPages();
+        // Only fetch pages if cache is empty
+        if (pagesCache.length === 0) {
+          await fetchNotionPages();
+        } else {
+          setNotionPages(pagesCache);
+          
+          // Find the selected page title from cache
+          if (pageId) {
+            const selectedPage = pagesCache.find(p => p.id === pageId);
+            if (selectedPage) {
+              setSelectedPageTitle(selectedPage.title);
+            }
+          }
+        }
       }
     } catch (err) {
       console.error('Failed to load settings:', err);
     }
-  };
+  }, []);
   
-  const verifyToken = async () => {
+  // Effect depends on loadSavedSettings function now
+  useEffect(() => {
+    if (isLoaded) {
+      loadSavedSettings();
+    }
+  }, [isLoaded, loadSavedSettings]);
+  
+  const clearMessages = useCallback(() => {
+    setErrorMessage('');
+    setSuccessMessage('');
+  }, []);
+  
+  const verifyToken = useCallback(async () => {
     clearMessages();
     
     if (!apiToken.trim()) {
@@ -91,20 +108,26 @@ const Settings: React.FC = () => {
       if (valid) {
         setSavedToken(apiToken);
         setSuccessMessage('API token verified successfully!');
-        fetchNotionPages();
+        // Clear the cache when the token changes
+        pagesCache = [];
+        await fetchNotionPages();
       }
     } catch (error) {
       setErrorMessage(`Error: ${error}`);
       setIsTokenValid(false);
     }
-  };
+  }, [apiToken, clearMessages]);
   
-  const fetchNotionPages = async () => {
+  const fetchNotionPages = useCallback(async () => {
     setIsFetchingPages(true);
     clearMessages();
     
     try {
+      // If the cache is empty or we're explicitly refreshing, fetch pages
       const pages = await invoke<NotionPage[]>('search_notion_pages');
+      
+      // Update cache and state
+      pagesCache = pages;
       setNotionPages(pages);
       
       // If there's a selected page, find its title
@@ -119,9 +142,9 @@ const Settings: React.FC = () => {
     } finally {
       setIsFetchingPages(false);
     }
-  };
+  }, [selectedPageId, clearMessages]);
   
-  const saveSelectedPage = async () => {
+  const saveSelectedPage = useCallback(async () => {
     if (!selectedPageId) {
       setErrorMessage('Please select a page');
       return;
@@ -147,29 +170,30 @@ const Settings: React.FC = () => {
     } catch (error) {
       setErrorMessage(`Failed to save selected page: ${error}`);
     }
-  };
+  }, [selectedPageId, notionPages, clearMessages]);
   
-  const clearMessages = () => {
-    setErrorMessage('');
-    setSuccessMessage('');
-  };
+  const handleBackNavigation = useCallback(async () => {
+    try {
+      // First close the settings window
+      await invoke('close_settings');
+      // Then show the note input window
+      await invoke('show_note_input');
+    } catch (error) {
+      console.error('Error navigating back:', error);
+    }
+  }, []);
   
+  const toggleDarkMode = useCallback(() => {
+    setDarkMode(prevMode => !prevMode);
+  }, []);
+
   return (
     <div className="settings-container">
       <div className="settings-header">
         <div className="header-left">
           <button 
             className="back-button"
-            onClick={async () => {
-              try {
-                // First close the settings window
-                await invoke('close_settings');
-                // Then show the note input window
-                await invoke('show_note_input');
-              } catch (error) {
-                console.error('Error navigating back:', error);
-              }
-            }}
+            onClick={handleBackNavigation}
             title="Back to Notes"
           >
             ←
@@ -179,7 +203,7 @@ const Settings: React.FC = () => {
         <div className="theme-toggle">
           <button 
             className="theme-toggle-button" 
-            onClick={() => setDarkMode(!darkMode)}
+            onClick={toggleDarkMode}
             title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
             {darkMode ? '☀️' : '🌙'}
@@ -308,4 +332,4 @@ const Settings: React.FC = () => {
   );
 };
 
-export default Settings;
+export default memo(Settings);

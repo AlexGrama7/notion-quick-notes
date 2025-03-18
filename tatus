@@ -1,0 +1,10 @@
+README.md
+src-tauri/src/lib.rs
+src-tauri/src/main.rs
+src-tauri/tauri.conf.json
+src/App.css
+src/App.tsx
+src/components/NoteInput.css
+src/components/NoteInput.tsx
+src/components/Settings.css
+src/components/Settings.tsx

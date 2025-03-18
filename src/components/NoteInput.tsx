@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import './NoteInput.css';
 
@@ -26,38 +26,8 @@ const NoteInput: React.FC = () => {
     }
   }, [darkMode]);
   
-  useEffect(() => {
-    // Focus the textarea when the component mounts
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
-    
-    // Add keyboard event listeners
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        handleCancel();
-      } else if (e.key === 'Enter' && e.ctrlKey) {
-        handleSave();
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    
-    // Add online/offline event listeners
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-    
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, [note]);
-  
-  const handleSave = async () => {
+  // Memoize handlers to prevent recreation on every render
+  const handleSave = useCallback(async () => {
     if (!note.trim()) {
       return;
     }
@@ -95,34 +65,74 @@ const NoteInput: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [note, isOffline]);
   
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     invoke('close_note_input');
-  };
+  }, []);
   
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     invoke('close_note_input');
-  };
+  }, []);
   
-  const openSettings = async () => {
-    console.log("Opening settings from note input");
+  const openSettings = useCallback(async () => {
     try {
       // First close the note input window
       await invoke('close_note_input');
-      console.log("Note window closed");
       
       // Then show settings (will reuse existing window if present)
       await invoke('show_settings');
-      console.log("Settings window opened");
     } catch (err) {
       console.error("Error switching to settings:", err);
     }
-  };
+  }, []);
   
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
+  const toggleDarkMode = useCallback(() => {
+    setDarkMode(prevMode => !prevMode);
+  }, []);
+
+  // Optimized event handler setup to only run once
+  useEffect(() => {
+    // Focus the textarea when the component mounts
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+    
+    // Add keyboard event listeners
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleCancel();
+      } else if (e.key === 'Enter' && e.ctrlKey) {
+        handleSave();
+      }
+    };
+    
+    // Add online/offline event listeners
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [handleSave, handleCancel]);
+  
+  // Memoized TextArea component to prevent unnecessary re-renders
+  const NoteTextArea = memo(() => (
+    <textarea
+      ref={textareaRef}
+      className="note-textarea"
+      placeholder="Type your note here..."
+      value={note}
+      onChange={(e) => setNote(e.target.value)}
+    />
+  ));
+  NoteTextArea.displayName = 'NoteTextArea';
 
   return (
     <div className="note-input-container">
@@ -147,13 +157,7 @@ const NoteInput: React.FC = () => {
         </div>
       )}
       
-      <textarea
-        ref={textareaRef}
-        className="note-textarea"
-        placeholder="Type your note here..."
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-      />
+      <NoteTextArea />
       
       {error && (
         <div className="error-message">
@@ -177,4 +181,5 @@ const NoteInput: React.FC = () => {
   );
 };
 
-export default NoteInput;
+// Export as React.memo to prevent unnecessary re-renders at the component level
+export default memo(NoteInput);

@@ -3,6 +3,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tauri::State;
 use chrono::{Local, Timelike, Datelike};
+use std::sync::{Mutex, Arc};
+use std::collections::HashMap;
+use std::time::{Duration, Instant};
 
 use crate::config::AppState;
 
@@ -15,14 +18,41 @@ pub struct NotionPage {
     pub url: String,
 }
 
+// Cache structure with expiration time
+struct CacheEntry<T> {
+    data: T,
+    expires_at: Instant,
+}
+
+// Global cache for API responses
+lazy_static::lazy_static! {
+    static ref PAGES_CACHE: Mutex<Option<CacheEntry<Vec<NotionPage>>>> = Mutex::new(None);
+    static ref CLIENT_POOL: Arc<Mutex<HashMap<String, Client>>> = Arc::new(Mutex::new(HashMap::new()));
+}
+
+// Cache duration (5 minutes)
+const CACHE_DURATION: Duration = Duration::from_secs(300);
+
 // Notion API client
 struct NotionApiClient {
     client: Client,
-    _api_token: String, // Prefixed with underscore to indicate intentionally unused
+    api_token: String, 
 }
 
 impl NotionApiClient {
     pub fn new(api_token: String) -> Result<Self, String> {
+        // Try to get a client from the pool first
+        {
+            let client_pool = CLIENT_POOL.lock().unwrap();
+            if let Some(client) = client_pool.get(&api_token) {
+                return Ok(NotionApiClient {
+                    client: client.clone(),
+                    api_token: api_token.clone(),
+                });
+            }
+        }
+        
+        // Create a new client if none exists in the pool
         let mut headers = header::HeaderMap::new();
         headers.insert(
             header::AUTHORIZATION, 
@@ -40,12 +70,19 @@ impl NotionApiClient {
         
         let client = Client::builder()
             .default_headers(headers)
+            .timeout(Duration::from_secs(10)) // Add timeout for better error handling
             .build()
             .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
+        
+        // Store the client in the pool
+        {
+            let mut client_pool = CLIENT_POOL.lock().unwrap();
+            client_pool.insert(api_token.clone(), client.clone());
+        }
             
         Ok(NotionApiClient {
             client,
-            _api_token: api_token,
+            api_token,
         })
     }
     
@@ -60,6 +97,17 @@ impl NotionApiClient {
     }
     
     pub async fn search_pages(&self) -> Result<Vec<NotionPage>, String> {
+        // Check cache first
+        {
+            let cache = PAGES_CACHE.lock().unwrap();
+            if let Some(entry) = &*cache {
+                if Instant::now() < entry.expires_at {
+                    return Ok(entry.data.clone());
+                }
+            }
+        }
+        
+        // Cache miss or expired, fetch from API
         let search_body = json!({
             "filter": {
                 "value": "page",
@@ -129,6 +177,15 @@ impl NotionApiClient {
                 None
             })
             .collect();
+        
+        // Update cache with new data
+        {
+            let mut cache = PAGES_CACHE.lock().unwrap();
+            *cache = Some(CacheEntry {
+                data: pages.clone(),
+                expires_at: Instant::now() + CACHE_DURATION,
+            });
+        }
             
         Ok(pages)
     }
@@ -205,12 +262,21 @@ impl NotionApiClient {
 
 // Tauri commands for Notion API integration
 
+// Function to invalidate cache (call when token changes)
+fn invalidate_cache() {
+    let mut cache = PAGES_CACHE.lock().unwrap();
+    *cache = None;
+}
+
 // Set and verify API token
 #[tauri::command]
 pub async fn set_notion_api_token(
     api_token: String,
     state: State<'_, AppState>,
 ) -> Result<bool, String> {
+    // Clear all caches when token changes
+    invalidate_cache();
+    
     match NotionApiClient::new(api_token.clone()) {
         Ok(client) => {
             match client.verify_token().await {
@@ -245,31 +311,20 @@ pub fn get_notion_api_token(state: State<'_, AppState>) -> Result<String, String
     Ok(config.notion_api_token.clone())
 }
 
-// Search Notion pages
+// Search Notion pages with cache usage
 #[tauri::command]
 pub async fn search_notion_pages(
     state: State<'_, AppState>,
 ) -> Result<Vec<NotionPage>, String> {
-    let api_token;
-    {
-        let config = state.config.lock().unwrap();
-        
-        if config.notion_api_token.is_empty() {
-            return Err("Notion API token not set".into());
-        }
-        
-        api_token = config.notion_api_token.clone();
+    let config = state.config.lock().unwrap();
+    let api_token = config.notion_api_token.clone();
+    
+    if api_token.is_empty() {
+        return Err("API token is not set".into());
     }
     
-    match NotionApiClient::new(api_token) {
-        Ok(client) => {
-            match client.search_pages().await {
-                Ok(pages) => Ok(pages),
-                Err(e) => Err(format!("Failed to search pages: {}", e))
-            }
-        }
-        Err(e) => Err(format!("Failed to create API client: {}", e))
-    }
+    let client = NotionApiClient::new(api_token)?;
+    client.search_pages().await
 }
 
 // Get the selected page ID
