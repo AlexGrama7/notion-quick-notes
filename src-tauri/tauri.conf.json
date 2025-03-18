@@ -34,7 +34,7 @@
       {
         "title": "Notion Quick Notes",
         "width": 450,
-        "height": 350,
+        "height": 150,
         "resizable": false,
         "center": true,
         "decorations": false,

@@ -7,6 +7,7 @@ const NoteInput: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [sendStatus, setSendStatus] = useState<null | 'sending' | 'sent'>(null);
   const [darkMode, setDarkMode] = useState(() => {
     // Check if user previously had dark mode enabled
     const savedTheme = localStorage.getItem('theme');
@@ -67,12 +68,19 @@ const NoteInput: React.FC = () => {
     }
     
     setIsSaving(true);
+    setSendStatus('sending');
     setError(null);
     
     try {
       await invoke('append_note', { noteText: note });
       setNote('');
-      handleCancel(); // Close the window after saving
+      setSendStatus('sent');
+      
+      // Clear the sent status after 2 seconds and close window
+      setTimeout(() => {
+        setSendStatus(null);
+        handleCancel(); // Close the window after showing sent message
+      }, 2000);
     } catch (err) {
       if (typeof err === 'string' && err.includes('network')) {
         setError('Network error: Please check your internet connection and try again.');
@@ -83,6 +91,7 @@ const NoteInput: React.FC = () => {
       } else {
         setError(`Error: ${err}`);
       }
+      setSendStatus(null);
     } finally {
       setIsSaving(false);
     }
@@ -97,12 +106,18 @@ const NoteInput: React.FC = () => {
   };
   
   const openSettings = async () => {
-    // First open the settings window, then close this one 
-    // with a slight delay to ensure the settings window opens first
-    await invoke('show_settings');
-    setTimeout(() => {
-      invoke('close_note_input');
-    }, 100);
+    console.log("Opening settings from note input");
+    try {
+      // First close the note input window
+      await invoke('close_note_input');
+      console.log("Note window closed");
+      
+      // Then show settings (will reuse existing window if present)
+      await invoke('show_settings');
+      console.log("Settings window opened");
+    } catch (err) {
+      console.error("Error switching to settings:", err);
+    }
   };
   
   const toggleDarkMode = () => {
@@ -151,22 +166,13 @@ const NoteInput: React.FC = () => {
         </div>
       )}
       
-      <div className="button-container">
-        <button 
-          className="cancel-button" 
-          onClick={handleCancel}
-          disabled={isSaving}
-        >
-          Cancel (Esc)
-        </button>
-        <button 
-          className="save-button" 
-          onClick={handleSave}
-          disabled={isSaving || !note.trim()}
-        >
-          {isSaving ? 'Saving...' : 'Save (Ctrl+Enter)'}
-        </button>
-      </div>
+      {sendStatus && (
+        <div className={`status-bar ${sendStatus}`}>
+          <span className="status-text">
+            {sendStatus === 'sending' ? 'Sending...' : 'Sent.'}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

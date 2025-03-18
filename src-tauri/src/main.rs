@@ -20,6 +20,11 @@ fn show_settings(app: tauri::AppHandle) {
     notion_quick_notes::show_settings(app);
 }
 
+#[tauri::command]
+fn close_settings(app: tauri::AppHandle) {
+    notion_quick_notes::close_settings(app);
+}
+
 fn main() {
     // Initialize app state
     let app_state = config::init_app_state();
@@ -39,6 +44,7 @@ fn main() {
             show_note_input,
             close_note_input,
             show_settings,
+            close_settings,
             notion_quick_notes::notion::get_notion_api_token,
             notion_quick_notes::notion::set_notion_api_token,
             notion_quick_notes::notion::search_notion_pages,
@@ -57,6 +63,14 @@ fn main() {
             SystemTrayEvent::MenuItemClick { id, .. } => {
                 match id.as_str() {
                     "settings" => {
+                        println!("Opening settings from system tray");
+                        
+                        // Hide the note input window if visible
+                        if let Some(window) = app.get_window("main") {
+                            let _ = window.hide();
+                        }
+                        
+                        // Show settings window (will reuse if exists)
                         notion_quick_notes::show_settings(app.app_handle());
                     }
                     "about" => {

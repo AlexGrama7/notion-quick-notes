@@ -154,21 +154,37 @@ const Settings: React.FC = () => {
     setSuccessMessage('');
   };
   
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
-  
   return (
     <div className="settings-container">
       <div className="settings-header">
-        <h1 className="settings-title">Notion Quick Notes Settings</h1>
-        <button 
-          className="dark-mode-toggle" 
-          onClick={toggleDarkMode}
-          title="Toggle Dark Mode"
-        >
-          {darkMode ? '☀️' : '🌙'}
-        </button>
+        <div className="header-left">
+          <button 
+            className="back-button"
+            onClick={async () => {
+              try {
+                // First close the settings window
+                await invoke('close_settings');
+                // Then show the note input window
+                await invoke('show_note_input');
+              } catch (error) {
+                console.error('Error navigating back:', error);
+              }
+            }}
+            title="Back to Notes"
+          >
+            ←
+          </button>
+          <h1>Settings</h1>
+        </div>
+        <div className="theme-toggle">
+          <button 
+            className="theme-toggle-button" 
+            onClick={() => setDarkMode(!darkMode)}
+            title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {darkMode ? '☀️' : '🌙'}
+          </button>
+        </div>
       </div>
       
       {isFirstTime && (

@@ -10,10 +10,13 @@ A lightweight Windows desktop application for quick note capture to Notion. Capt
 - **Minimalist Interface**: Clean, distraction-free note input
 - **Notion Integration**: Connect to your Notion workspace and select a target page
 - **Timestamps**: Automatically adds timestamps in the format `[DD MMM YY, HH:MM:SS]`
-- **System Tray**: Runs silently in the background
-- **Dark Mode**: Customizable light and dark theme support
+- **System Tray**: Runs silently in the background with quick access to settings and about
+- **Dark Mode**: Customizable light and dark theme support with persistent preferences
 - **First-Time Setup Guide**: Helpful onboarding for new users
 - **Offline Support**: Detects network status and provides appropriate feedback
+- **Improved Window Management**: Smart window handling for settings and note input
+- **Enhanced Error Handling**: Clear error messages with direct settings access
+- **Responsive UI**: Optimized window sizes and improved button layouts
 
 ## Setup
 
@@ -90,21 +93,44 @@ All settings are stored locally in the app configuration directory:
 
 ## Recent Updates
 
-### v0.1.0 (March 2025)
+### v0.2.0 (Latest)
 
-- **Initial Release**
+- **Window Management Improvements**
+  - Fixed settings window handling to prevent app crashes
+  - Improved window reuse instead of recreating windows
+  - Better window focus management
+  - Smoother transitions between note input and settings
+
+- **UI/UX Enhancements**
+  - Improved button alignment and consistency
+  - Enhanced window title handling
+  - Better window size optimization
+  - Cleaner transitions between views
+
+- **System Tray Improvements**
+  - More reliable settings window access
+  - Added About page access
+  - Smoother window state management
+
+- **Error Handling**
+  - Added comprehensive error logging
+  - Improved error messages with actionable feedback
+  - Better handling of window state errors
+
+- **Performance Optimizations**
+  - Reduced window creation overhead
+  - Improved state management
+  - Better resource handling
+
+### v0.1.0 (Initial Release)
+
 - Core functionality: global hotkey, note input, Notion integration
-
-### Recent Improvements
-
-- **Added Dark Mode**: Toggle between light and dark themes
-- **Added About Page**: Comprehensive help and setup guide
-- **UI Improvements**: Cleaner button layout and better spacing
-- **Enhanced Settings**: Added first-time setup guide and improved token validation
-- **Offline Detection**: Added warning when network is unavailable
-- **Better Error Handling**: More helpful error messages with direct links to settings
-- **Theme Persistence**: Remembers your dark/light mode preference
-- **Smaller Window Size**: More compact interface for better workflow
+- Dark mode support
+- About page
+- UI improvements
+- Enhanced settings
+- Offline detection
+- Theme persistence
 
 ## License
 
