@@ -1,13 +1,14 @@
 .note-input-container {
   display: flex;
   flex-direction: column;
-  height: 150px;
-  max-height: 150px;
+  min-height: 150px;
+  max-height: 300px; /* Allow more height for banners and messages */
   width: 100%;
   background-color: var(--background-color);
   overflow: hidden;
   border-radius: 0;
-  contain: layout size style; /* Performance optimization */
+  /* Remove contain: layout size to allow height to adjust */
+  contain: style;
 }
 
 .titlebar {
@@ -30,6 +31,11 @@
 .titlebar-controls {
   display: flex;
   gap: 8px;
+  align-items: center;
+}
+
+.titlebar-rate-limit {
+  margin-right: 4px;
 }
 
 /* Combine common button styles */
@@ -56,10 +62,10 @@
 }
 
 .note-textarea {
-  height: 100px;
+  min-height: 80px;
   border: none;
   resize: none;
-  padding: 5px 8px;
+  padding: 8px;
   margin: 0;
   font-size: 14px;
   background-color: var(--background-color);
@@ -69,6 +75,10 @@
   flex: 1;
   width: 100%;
   box-sizing: border-box; /* Prevents sizing issues */
+  direction: ltr !important;
+  text-align: left !important;
+  line-height: 1.5;
+  unicode-bidi: normal !important;
 }
 
 /* Single scrollbar definition */
@@ -92,38 +102,94 @@
 .offline-banner {
   background-color: #ffa726;
   color: #333;
-  padding: 8px 16px;
-  font-size: 14px;
+  padding: 4px 8px;
+  font-size: 12px;
   text-align: center;
-  margin-bottom: 10px;
-  border-radius: var(--border-radius);
+  margin: 0;
+  border-bottom: 1px solid #e69722;
 }
 
 .error-message {
-  color: var(--error-color);
   margin: 10px 0;
   padding: 8px;
   border-radius: var(--border-radius);
-  background-color: rgba(211, 47, 47, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Error severity styles */
+.error-severity-info {
+  background-color: rgba(3, 155, 229, 0.1);
+  color: #0277bd;
+  border-left: 4px solid #0277bd;
+}
+
+.error-severity-warning {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #ef6c00;
+  border-left: 4px solid #ef6c00;
+}
+
+.error-severity-error {
+  background-color: rgba(211, 47, 47, 0.1);
+  color: var(--error-color);
+  border-left: 4px solid var(--error-color);
+}
+
+.error-severity-critical {
+  background-color: #4a0404;
+  color: #ffffff;
+  border-left: 4px solid #ff0000;
+  font-weight: bold;
+}
+
+.error-details {
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+.error-details-content {
+  padding: 5px;
+  margin-top: 5px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
 }
 
 .error-action-button {
   background-color: transparent;
-  border: none;
-  color: var(--primary-color);
+  border: 1px solid currentColor;
+  color: inherit;
   cursor: pointer;
   font-size: 14px;
-  margin-left: 10px;
-  text-decoration: underline;
+  padding: 4px 8px;
+  border-radius: 4px;
   white-space: nowrap;
+  align-self: flex-start;
+  margin-top: 4px;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.error-severity-info .error-action-button {
+  color: #0277bd;
+}
+
+.error-severity-warning .error-action-button {
+  color: #ef6c00;
+}
+
+.error-severity-error .error-action-button {
+  color: var(--error-color);
+}
+
+.error-severity-critical .error-action-button {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .error-action-button:hover {
-  color: var(--primary-hover);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Keyboard shortcut hint */
@@ -133,16 +199,23 @@
   margin-left: var(--spacing-sm);
 }
 
-/* Status bar styles with GPU acceleration */
+/* Status bar styles - high visibility */
 .status-bar {
-  height: 24px;
+  height: 40px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  transition: background-color 0.3s ease;
+  font-size: 16px;
+  transition: all 0.3s ease;
   transform: translateZ(0); /* Force GPU acceleration */
+  animation: fadeIn 0.3s ease;
+  z-index: 100;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .status-bar.sending {
@@ -151,10 +224,47 @@
 }
 
 .status-bar.sent {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: #4CAF50; /* Vibrant green color */
+  color: white; /* White text for better contrast */
+  animation: statusPulse 2s infinite;
 }
 
 .status-text {
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-text::before {
+  content: "✓";
+  font-size: 20px;
+  font-weight: bold;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes statusPulse {
+  0% { background-color: #4CAF50; }
+  50% { background-color: #2E7D32; }
+  100% { background-color: #4CAF50; }
+}
+
+/* Sync status component styling in NoteInput */
+.note-sync-status {
+  margin: 5px 8px 10px;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
+  background-color: var(--card-background, #f5f5f5);
+  font-size: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .note-sync-status {
+    border-color: var(--border-color-dark, rgba(255, 255, 255, 0.1));
+    background-color: var(--card-background-dark, #2a2a2a);
+  }
 }

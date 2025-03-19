@@ -2,6 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use notion_quick_notes::config;
+use notion_quick_notes::RateLimitInfo;
+use notion_quick_notes::error::ErrorResponse;
 use tauri::{CustomMenuItem, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem, Manager};
 
 // Define the commands with tauri::command attribute
@@ -23,6 +25,12 @@ fn show_settings(app: tauri::AppHandle) {
 #[tauri::command]
 fn close_settings(app: tauri::AppHandle) {
     notion_quick_notes::close_settings(app);
+}
+
+// Define our rate limit info command in main.rs
+#[tauri::command]
+fn rate_limit_info(state: tauri::State<'_, config::AppState>) -> Result<RateLimitInfo, ErrorResponse> {
+    notion_quick_notes::fetch_rate_limit_info(&state)
 }
 
 fn main() {
@@ -48,9 +56,11 @@ fn main() {
             notion_quick_notes::notion::get_notion_api_token,
             notion_quick_notes::notion::set_notion_api_token,
             notion_quick_notes::notion::search_notion_pages,
+            notion_quick_notes::notion::get_page_info,
             notion_quick_notes::notion::get_selected_page_id,
             notion_quick_notes::notion::set_selected_page_id,
             notion_quick_notes::notion::append_note,
+            rate_limit_info, // Use our new command name
         ])
         .setup(|app| {
             let app_handle = app.handle();

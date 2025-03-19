@@ -1,0 +1,225 @@
+/* NotificationIndicator styles */
+.notification-indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.notification-icon {
+  font-size: 16px;
+  color: var(--text-color);
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.notification-indicator:hover .notification-icon {
+  opacity: 1;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #ff4c4c;
+  color: white;
+  border-radius: 50%;
+  min-width: 16px;
+  height: 16px;
+  font-size: 10px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  animation: pulse-animation 1.5s infinite;
+}
+
+@keyframes pulse-animation {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 76, 76, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(255, 76, 76, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 76, 76, 0);
+  }
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 280px;
+  max-height: 350px;
+  background-color: var(--background-color);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform-origin: top right;
+  animation: dropdown-animation 0.2s ease;
+}
+
+@keyframes dropdown-animation {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.notification-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.notification-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.notification-action-button {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.notification-action-button:hover {
+  background-color: var(--hover-color);
+  color: var(--text-color);
+}
+
+.notifications-content {
+  overflow-y: auto;
+  max-height: 280px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.notification-item {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+  opacity: 0.85;
+  transition: all 0.2s ease;
+}
+
+.notification-item:hover {
+  background-color: var(--hover-color);
+  opacity: 1;
+}
+
+.notification-item.unread {
+  background-color: var(--hover-color);
+  opacity: 1;
+}
+
+.notification-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.notification-item-type {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.notification-item-type.success {
+  color: #2e7d32;
+}
+
+.notification-item-type.error {
+  color: #d32f2f;
+}
+
+.notification-item-type.warning {
+  color: #ed6c02;
+}
+
+.notification-item-type.info {
+  color: #0288d1;
+}
+
+.notification-item-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.notification-item-body {
+  font-size: 12px;
+  color: var(--text-color);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.empty-notifications {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: var(--text-muted);
+  height: 120px;
+}
+
+.empty-notifications-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  opacity: 0.6;
+}
+
+.empty-notifications-text {
+  font-size: 13px;
+  text-align: center;
+}
+
+.notification-footer {
+  padding: 8px 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px solid var(--border-color);
+}
+
+.view-all-button {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.view-all-button:hover {
+  background-color: var(--hover-color);
+}

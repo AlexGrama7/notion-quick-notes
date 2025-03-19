@@ -4,6 +4,66 @@ use tauri::{AppHandle, Manager, GlobalShortcutManager};
 pub mod config;
 pub mod notion;
 pub mod error;
+pub mod rate_limit;
+
+use serde::Serialize;
+use std::time::{SystemTime, UNIX_EPOCH};
+
+// Rate limit information returned to the frontend
+#[derive(Serialize)]
+pub struct RateLimitInfo {
+    limit: Option<u64>,
+    remaining: Option<u64>,
+    reset_at: Option<u64>,
+    is_limited: bool,
+    retry_after: Option<u64>,
+}
+
+// Function that provides rate limit information without being a Tauri command
+pub fn fetch_rate_limit_info(state: &tauri::State<config::AppState>) -> Result<RateLimitInfo, error::ErrorResponse> {
+    let config = state.config.lock().unwrap();
+    let api_token = &config.notion_api_token;
+    
+    // Get the rate limit manager
+    let rate_limit_manager = rate_limit::RateLimitManager::instance();
+    
+    // Check if we're currently rate limited
+    let is_limited = !rate_limit_manager.should_allow_request(api_token);
+    
+    // Get the recommended delay if we're limited
+    let retry_after = if is_limited {
+        let delay = rate_limit_manager.get_recommended_delay(api_token);
+        if !delay.is_zero() {
+            Some(delay.as_secs())
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    
+    // Get the current rate limit state if available
+    let state = rate_limit_manager.get_state(api_token);
+    
+    // Calculate the current Unix timestamp
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    
+    // Calculate reset time as a Unix timestamp
+    let reset_at = state.as_ref().and_then(|s| {
+        s.time_until_reset().map(|secs| now + secs)
+    });
+    
+    Ok(RateLimitInfo {
+        limit: state.as_ref().and_then(|s| s.limit.map(|v| v as u64)),
+        remaining: state.as_ref().and_then(|s| s.remaining.map(|v| v as u64)),
+        reset_at,
+        is_limited,
+        retry_after,
+    })
+}
 
 // Function to check if settings are configured before showing the note input
 pub fn check_settings_configured(app: &AppHandle) -> bool {
