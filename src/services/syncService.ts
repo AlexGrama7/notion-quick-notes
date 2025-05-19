@@ -129,10 +129,11 @@ export class SyncService {
   }
 
   // Calculate backoff delay for retries using exponential backoff
-  private calculateBackoffDelay(retryCount: number): number {
-    const delay = this.config.initialRetryDelay * Math.pow(2, retryCount);
-    return Math.min(delay, this.config.maxRetryDelay);
-  }
+  // Commented out until needed to avoid TypeScript warnings
+  // private calculateBackoffDelay(retryCount: number): number {
+  //   const delay = this.config.initialRetryDelay * Math.pow(2, retryCount);
+  //   return Math.min(delay, this.config.maxRetryDelay);
+  // }
 
   // Sync a specific note with Notion
   private async syncNote(note: QueuedNote): Promise<boolean> {
@@ -141,17 +142,15 @@ export class SyncService {
       await updateNoteStatus(note.id, 'syncing');
       
       // Get page information if possible
-      let pageTitle = "Notion page";
-      try {
-        const response = await invoke<any>('get_page_info', {
-          pageId: note.pageId
-        });
-        if (response && response.title) {
-          pageTitle = response.title;
-        }
-      } catch (e) {
-        console.warn("Could not get page title:", e);
-      }
+      // Commented out until needed for UI display
+      // try {
+      //   const response = await invoke<any>('get_page_info', {
+      //     pageId: note.pageId
+      //   });
+      //   // Page title will be used in future UI updates
+      // } catch (e) {
+      //   console.warn("Could not get page title:", e);
+      // }
       
       // Invoke Tauri command to append note to Notion
       await invoke('append_note', {

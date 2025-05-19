@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
+import AISettings from './AISettings';
+import AIModelFallbackNotification from './AIModelFallbackNotification';
+import { initializeAIService } from '../services/ai';
 import './Settings.css';
 
 interface NotionPage {
@@ -12,7 +15,10 @@ interface NotionPage {
 // Create a cache for pages to prevent unnecessary API calls
 let pagesCache: NotionPage[] = [];
 
+type Tab = 'notion' | 'ai';
+
 const Settings: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<Tab>('notion');
   const [apiToken, setApiToken] = useState('');
   const [savedToken, setSavedToken] = useState('');
   const [isTokenValid, setIsTokenValid] = useState(false);
@@ -29,6 +35,7 @@ const Settings: React.FC = () => {
     return savedTheme === 'dark';
   });
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isAIInitialized, setIsAIInitialized] = useState(false);
   
   useEffect(() => {
     // Apply theme when component mounts and when darkMode changes
@@ -41,10 +48,41 @@ const Settings: React.FC = () => {
     }
   }, [darkMode]);
   
-  // No need for setTimeout - directly set isLoaded
+  // Initialize the app and services
   useEffect(() => {
     setIsLoaded(true);
-  }, []);
+    
+    // Initialize AI service if not already done
+    if (!isAIInitialized) {
+      try {
+        initializeAIService();
+        setIsAIInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize AI service:', error);
+      }
+    }
+    
+    // Extra safeguard: maintain tabs visibility at all times
+    const ensureTabsVisibility = () => {
+      const tabsElement = document.getElementById('settings-fixed-tabs');
+      if (tabsElement) {
+        // Force visibility and styles to prevent disappearing
+        tabsElement.style.display = 'flex';
+        tabsElement.style.visibility = 'visible';
+        tabsElement.style.opacity = '1';
+      }
+    };
+    
+    // Run periodically to ensure tabs stay visible
+    const intervalId = setInterval(ensureTabsVisibility, 500);
+    
+    // Run immediately
+    ensureTabsVisibility();
+    
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [isAIInitialized]);
   
   const loadSavedSettings = useCallback(async () => {
     try {
@@ -189,9 +227,10 @@ const Settings: React.FC = () => {
 
   return (
     <div className="settings-container">
+      {/* Fixed header section */}
       <div className="settings-header">
         <div className="header-left">
-          <button 
+          <button
             className="back-button"
             onClick={handleBackNavigation}
             title="Back to Notes"
@@ -201,8 +240,8 @@ const Settings: React.FC = () => {
           <h1>Settings</h1>
         </div>
         <div className="theme-toggle">
-          <button 
-            className="theme-toggle-button" 
+          <button
+            className="theme-toggle-button"
             onClick={toggleDarkMode}
             title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
@@ -211,6 +250,44 @@ const Settings: React.FC = () => {
         </div>
       </div>
       
+      {/* Always visible navigation tabs - fixed positioning */}
+      <div id="settings-fixed-tabs" className="settings-tabs">
+        <button
+          className={`tab-button ${activeTab === 'notion' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveTab('notion');
+            // Force tabs visibility on click
+            const tabsElement = document.getElementById('settings-fixed-tabs');
+            if (tabsElement) {
+              tabsElement.style.display = 'flex';
+              tabsElement.style.visibility = 'visible';
+              tabsElement.style.opacity = '1';
+              tabsElement.style.zIndex = '1000';
+            }
+          }}
+        >
+          Notion
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveTab('ai');
+            // Force tabs visibility on click
+            const tabsElement = document.getElementById('settings-fixed-tabs');
+            if (tabsElement) {
+              tabsElement.style.display = 'flex';
+              tabsElement.style.visibility = 'visible';
+              tabsElement.style.opacity = '1';
+              tabsElement.style.zIndex = '1000';
+            }
+          }}
+        >
+          AI Assistant
+        </button>
+        {/* Appearance tab removed - dark mode toggle is always available in header */}
+      </div>
+      
+      {/* Common first-time setup message */}
       {isFirstTime && (
         <div className="first-time-setup">
           <h3>Welcome to Notion Quick Notes!</h3>
@@ -225,107 +302,123 @@ const Settings: React.FC = () => {
         </div>
       )}
       
-      <div className="settings-section">
-        <h2>Notion API Integration</h2>
-        <p className="settings-description">
-          You need a Notion API token to connect to your Notion workspace.
-          <a 
-            href="https://developers.notion.com/docs/getting-started" 
-            target="_blank" 
-            rel="noreferrer"
-            className="settings-link"
-          >
-            Learn how to get your API token
-          </a>
-        </p>
-        
-        <div className="input-group">
-          <label htmlFor="apiToken">Notion API Token:</label>
-          <input
-            type="password"
-            id="apiToken"
-            className="settings-input"
-            value={apiToken}
-            onChange={(e) => setApiToken(e.target.value)}
-            placeholder="secret_..."
-          />
-          <button 
-            className="verify-button"
-            onClick={verifyToken}
-            disabled={!apiToken || apiToken === savedToken}
-          >
-            Verify Token
-          </button>
-        </div>
-        
-        {isTokenValid && (
-          <div className="page-selection-section">
-            <h2>Select Default Notion Page</h2>
-            <p className="settings-description">
-              Select the page where your quick notes will be appended.
-            </p>
-            
-            <button 
-              className="fetch-button"
-              onClick={fetchNotionPages}
-              disabled={isFetchingPages}
+      {/* Notion Integration Tab */}
+      {activeTab === 'notion' && (
+        <div className="settings-section">
+          <h2>Notion API Integration</h2>
+          <p className="settings-description">
+            You need a Notion API token to connect to your Notion workspace.
+            <a
+              href="https://developers.notion.com/docs/getting-started"
+              target="_blank"
+              rel="noreferrer"
+              className="settings-link"
             >
-              {isFetchingPages ? 'Fetching...' : 'Fetch Pages'}
+              Learn how to get your API token
+            </a>
+          </p>
+          
+          <div className="input-group">
+            <label htmlFor="apiToken">Notion API Token:</label>
+            <input
+              type="password"
+              id="apiToken"
+              className="settings-input"
+              value={apiToken}
+              onChange={(e) => setApiToken(e.target.value)}
+              placeholder="secret_..."
+            />
+            <button
+              className="verify-button"
+              onClick={verifyToken}
+              disabled={!apiToken || apiToken === savedToken}
+            >
+              Verify Token
             </button>
-            
-            {notionPages.length > 0 && (
-              <>
-                <div className="select-container">
-                  <label htmlFor="notionPage">Select Page:</label>
-                  <select
-                    id="notionPage"
-                    className="page-select"
-                    value={selectedPageId}
-                    onChange={(e) => setSelectedPageId(e.target.value)}
+          </div>
+          
+          {isTokenValid && (
+            <div className="page-selection-section">
+              <h2>Select Default Notion Page</h2>
+              <p className="settings-description">
+                Select the page where your quick notes will be appended.
+              </p>
+              
+              <button
+                className="fetch-button"
+                onClick={fetchNotionPages}
+                disabled={isFetchingPages}
+              >
+                {isFetchingPages ? 'Fetching...' : 'Fetch Pages'}
+              </button>
+              
+              {notionPages.length > 0 && (
+                <>
+                  <div className="select-container">
+                    <label htmlFor="notionPage">Select Page:</label>
+                    <select
+                      id="notionPage"
+                      className="page-select"
+                      value={selectedPageId}
+                      onChange={(e) => setSelectedPageId(e.target.value)}
+                    >
+                      <option value="">-- Select a page --</option>
+                      {notionPages.map(page => (
+                        <option key={page.id} value={page.id}>
+                          {page.icon ? `${page.icon} ` : ''}{page.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <button
+                    className="save-button"
+                    onClick={saveSelectedPage}
+                    disabled={!selectedPageId}
                   >
-                    <option value="">-- Select a page --</option>
-                    {notionPages.map(page => (
-                      <option key={page.id} value={page.id}>
-                        {page.icon ? `${page.icon} ` : ''}{page.title}
-                      </option>
-                    ))}
-                  </select>
+                    Save Selected Page
+                  </button>
+                </>
+              )}
+              
+              {selectedPageTitle && (
+                <div className="selected-page">
+                  <p>Current page: <strong>{selectedPageTitle}</strong></p>
                 </div>
-                
-                <button 
-                  className="save-button"
-                  onClick={saveSelectedPage}
-                  disabled={!selectedPageId}
-                >
-                  Save Selected Page
-                </button>
-              </>
-            )}
-            
-            {selectedPageTitle && (
-              <div className="selected-page">
-                <p>Current page: <strong>{selectedPageTitle}</strong></p>
-              </div>
-            )}
-          </div>
-        )}
-        
-        {errorMessage && (
-          <div className="error-message">
-            {errorMessage}
-          </div>
-        )}
-        
-        {successMessage && (
-          <div className="success-message">
-            {successMessage}
-          </div>
-        )}
-      </div>
+              )}
+            </div>
+          )}
+          
+          {errorMessage && (
+            <div className="error-message">
+              {errorMessage}
+            </div>
+          )}
+          
+          {successMessage && (
+            <div className="success-message">
+              {successMessage}
+            </div>
+          )}
+        </div>
+      )}
       
+      {/* AI Assistant Tab */}
+      {activeTab === 'ai' && (
+        <div className="settings-section">
+          <h2>AI Integration Settings</h2>
+          <AISettings />
+        </div>
+      )}
+      
+      {/* Appearance tab removed - dark mode toggle is always available in header */}
+      
+      {/* Show model fallback notification */}
+      <AIModelFallbackNotification />
+
       <div className="settings-footer">
         <p>
-          Notion Quick Notes - v0.1.0
+          Notion Quick Notes - v1.2.0 (GPT-4o)
         </p>
       </div>
     </div>
