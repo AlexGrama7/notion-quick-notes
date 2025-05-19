@@ -1,0 +1,205 @@
+.ai-settings-container {
+  padding: 0;
+  width: 100%;
+}
+
+/* Fallback strategy styles removed as section is no longer needed */
+
+/* Override to ensure consistent styling with parent */
+.settings-section {
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 10; /* Lower than the tabs */
+}
+
+.settings-section h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: var(--text-color);
+}
+
+.setting-group {
+  margin-bottom: 16px;
+}
+
+.setting-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: var(--text-secondary-color);
+}
+
+.setting-group input[type="text"],
+.setting-group input[type="password"],
+.setting-group select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--input-bg-color, #fff);
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.setting-group input[type="text"]:focus,
+.setting-group input[type="password"]:focus,
+.setting-group select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+}
+
+.checkbox-setting {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-setting input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.checkbox-setting label {
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+.api-key-input {
+  display: flex;
+  align-items: center;
+}
+
+.api-key-input input {
+  flex-grow: 1;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.api-key-input .toggle-visibility {
+  padding: 8px 12px;
+  background-color: var(--secondary-button-bg, #f3f3f3);
+  border: 1px solid var(--border-color);
+  border-left: none;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  cursor: pointer;
+  color: var(--text-secondary-color);
+  font-size: 14px;
+}
+
+.api-key-input .toggle-visibility:hover {
+  background-color: var(--secondary-button-hover-bg, #e6e6e6);
+}
+
+.api-key-actions {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.test-connection-button {
+  padding: 6px 12px;
+  background-color: var(--secondary-button-bg, #f3f3f3);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.test-connection-button:hover:not(:disabled) {
+  background-color: var(--secondary-button-hover-bg, #e6e6e6);
+}
+
+.test-connection-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.test-status {
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+.test-success {
+  color: var(--success-color, #4caf50);
+}
+
+.test-error {
+  color: var(--error-color, #f44336);
+}
+
+.test-loading {
+  color: var(--text-secondary-color);
+}
+
+.settings-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.save-button {
+  padding: 8px 16px;
+  background-color: var(--primary-button-bg, #0078d4);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.save-button:hover {
+  background-color: var(--primary-button-hover-bg, #106ebe);
+}
+
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.stat-item {
+  background-color: var(--card-bg, #f9f9f9);
+  padding: 12px;
+  border-radius: 4px;
+}
+
+.stat-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary-color);
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+label.disabled {
+  opacity: 0.6;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .api-key-input .toggle-visibility {
+  background-color: #333;
+  border-color: #555;
+}
+
+[data-theme="dark"] .api-key-input .toggle-visibility:hover {
+  background-color: #444;
+}
+
+[data-theme="dark"] .test-connection-button {
+  background-color: #333;
+  border-color: #555;
+}
+
+[data-theme="dark"] .test-connection-button:hover:not(:disabled) {
+  background-color: #444;
+}
+
+[data-theme="dark"] .stat-item {
+  background-color: #2c2c2c;
+}

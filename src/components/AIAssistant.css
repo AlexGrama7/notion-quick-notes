@@ -1,0 +1,269 @@
+/* AI Assistant Styles */
+:root {
+  --ai-primary-color: #6560f7;
+  --ai-accent-color: #8582ff;
+  --ai-background: rgba(255, 255, 255, 0.95);
+  --ai-border-color: #e0e0e0;
+  --ai-text-color: #333;
+  --ai-loading-color: #6560f7;
+  --ai-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+  --ai-background: rgba(40, 40, 40, 0.95);
+  --ai-border-color: #444;
+  --ai-text-color: #e0e0e0;
+  --ai-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Collapsed state */
+.ai-assistant-collapsed {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+  z-index: 10;
+}
+
+.ai-assistant-toggle-button {
+  display: flex;
+  align-items: center;
+  background-color: var(--ai-background);
+  color: var(--ai-primary-color);
+  border: 1px solid var(--ai-border-color);
+  border-radius: 18px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--ai-shadow);
+  transition: all 0.2s ease;
+}
+
+.ai-assistant-toggle-button:hover {
+  background-color: var(--ai-primary-color);
+  color: white;
+}
+
+.ai-icon {
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+/* Expanded state */
+.ai-assistant-expanded {
+  background-color: var(--ai-background);
+  border: 1px solid var(--ai-border-color);
+  border-radius: 8px;
+  margin: 16px 0;
+  overflow: hidden;
+  box-shadow: var(--ai-shadow);
+  transition: all 0.3s ease;
+  max-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-assistant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: var(--ai-primary-color);
+  color: white;
+}
+
+.ai-assistant-title {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.ai-model-badge {
+  margin-left: 8px;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: normal;
+}
+
+.ai-assistant-close {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.ai-assistant-close:hover {
+  opacity: 1;
+}
+
+.ai-assistant-content {
+  padding: 16px;
+  color: var(--ai-text-color);
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Loading state */
+.ai-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+  color: var(--ai-text-color);
+}
+
+.ai-loading span {
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.ai-loading-animation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-loading-dot {
+  background-color: var(--ai-loading-color);
+  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  margin: 0 4px;
+  animation: ai-loading 1.4s infinite ease-in-out both;
+}
+
+.ai-loading-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.ai-loading-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes ai-loading {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Error state */
+.ai-error {
+  padding: 12px;
+  background-color: rgba(255, 0, 0, 0.05);
+  border-radius: 6px;
+  border-left: 3px solid #ff5252;
+}
+
+.ai-error p {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+}
+
+.ai-retry-button {
+  background-color: #ff5252;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* Empty state */
+.ai-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  text-align: center;
+}
+
+.ai-empty-state p {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--ai-text-color);
+}
+
+.ai-generate-button {
+  background-color: var(--ai-primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.ai-generate-button:hover {
+  background-color: var(--ai-accent-color);
+}
+
+/* Suggestion state */
+.ai-suggestion {
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-suggestion-text {
+  background-color: rgba(101, 96, 247, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.ai-suggestion-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.ai-apply-button {
+  background-color: var(--ai-primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.ai-apply-button:hover {
+  background-color: var(--ai-accent-color);
+}
+
+.ai-secondary-button {
+  background-color: transparent;
+  color: var(--ai-text-color);
+  border: 1px solid var(--ai-border-color);
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ai-secondary-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .ai-secondary-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}

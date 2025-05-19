@@ -21,6 +21,21 @@
   user-select: none;
   height: 30px;
   will-change: transform; /* Performance hint for animations */
+  cursor: move; /* Indicates draggable area for users */
+  -webkit-app-region: drag; /* Support for legacy Electron/Webkit */
+}
+
+/* Ensure elements inside the titlebar are not draggable */
+.titlebar-controls {
+  -webkit-app-region: no-drag;
+  cursor: default;
+}
+
+/* Ensure buttons in the titlebar don't inherit the drag cursor */
+.titlebar button,
+.titlebar-button {
+  -webkit-app-region: no-drag;
+  cursor: pointer;
 }
 
 .titlebar-text {

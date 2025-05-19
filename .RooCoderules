@@ -1,0 +1,79 @@
+# Notion Quick Notes - Project Intelligence
+
+This document captures key project patterns, workflows, and intelligence to facilitate effective development.
+
+## Project Structure Patterns
+
+- **Component Organization**: UI components are in `src/components/`, with each component having its own CSS file
+- **Service Organization**: Business logic is organized into service modules in `src/services/`
+- **Backend Code**: Tauri/Rust backend code lives in `src-tauri/src/`
+- **Feature Grouping**: Related features are grouped in subdirectories (e.g., `src/services/ai/`)
+
+## Naming Conventions
+
+- **Component Files**: PascalCase (e.g., `AIAssistant.tsx`)
+- **CSS Files**: Match component name (e.g., `AIAssistant.css`)
+- **Service Files**: camelCase (e.g., `aiService.ts`, `notificationService.ts`)
+- **Rust Files**: snake_case (e.g., `notion.rs`, `rate_limit.rs`)
+
+## Styling Patterns
+
+- **Theme Variables**: CSS variables in root for theming (light/dark mode)
+- **Component-Specific CSS**: Each component has its own CSS file with scoped classes
+- **Responsive Design**: Media queries for adapting to different screen sizes
+- **Consistent UI Elements**: Common styling for buttons, inputs, and containers
+
+## Architectural Patterns
+
+- **Service Initialization**: Services are initialized at component mount
+- **State Management**: React hooks for local state, service modules for shared state
+- **Error Handling**: Structured error responses with recovery actions
+- **Async Operations**: Promise-based with proper error catching
+- **Offline Support**: Queue-based system with background synchronization
+
+## AI Integration Patterns
+
+- **Model Fallback**: Primary model (GPT-4o) with fallback mechanism (GPT-4o mini)
+- **AI Prompting**: Structured prompts with clear context and instructions
+- **User Control**: AI features are opt-in, with user triggering suggestions
+- **Feedback Loop**: UI for accepting or discarding AI suggestions
+- **Error Recovery**: Graceful degradation when AI services are unavailable
+
+## Code Quality Standards
+
+- **TypeScript Types**: Strong typing for all objects and functions
+- **Component Memoization**: React.memo for performance optimization
+- **Error Boundaries**: Graceful handling of unexpected errors
+- **Code Comments**: Explanatory comments for complex logic
+- **Function Size**: Keep functions small and focused on single responsibility
+
+## Testing Approach
+
+- **Unit Tests**: For core business logic and utility functions
+- **Component Tests**: For UI components in isolation
+- **Integration Tests**: For service interactions
+- **Error Case Testing**: Explicit tests for error handling paths
+- **Mock Services**: For testing components with external dependencies
+
+## Development Workflow
+
+- **Feature Implementation**: Create/update components → Add styling → Add tests
+- **Bug Fixes**: Reproduce → Identify root cause → Fix → Add regression test
+- **Refactoring**: Identify pattern → Extract common code → Update callers
+- **Documentation**: Update Memory Bank after significant changes
+
+## Project-Specific Knowledge
+
+- **Tab Management**: The Settings component uses a tab-based UI with conditional rendering
+- **AI Assistant**: Collapsible UI that expands when generating suggestions
+- **Theme Switching**: Dark/light mode toggle affects all components via CSS variables
+- **Notion API Integration**: Rate-limited API with specialized error handling
+- **OpenAI Integration**: Multiple model support with automatic fallback mechanism
+
+## Known Challenges
+
+- **Rate Limiting**: Both Notion and OpenAI APIs have rate limits requiring careful handling
+- **Network Transitions**: Offline → online transitions need special handling for queued items
+- **Token Limits**: AI models have context limits requiring prompt optimization
+- **API Key Security**: Secure storage of user API keys is critical
+- **Error Recovery**: Some operations need automatic retry with backoff

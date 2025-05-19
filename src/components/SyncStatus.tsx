@@ -14,7 +14,7 @@ const SyncStatus: React.FC<SyncStatusProps> = ({ className }) => {
   const [status, setStatus] = useState<SyncStatusEvent>('idle');
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [queueCount, setQueueCount] = useState<number>(0);
-  const [syncDetails, setSyncDetails] = useState<any>(null);
+  const [, setSyncDetails] = useState<any>(null);
   const [lastSyncTime, setLastSyncTime] = useState<number | null>(null);
 
   // Update queue count periodically
